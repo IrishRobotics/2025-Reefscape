@@ -22,9 +22,7 @@ public class Arm extends SubsystemBase {
   private ShuffleboardTab driveTab;
   private GenericEntry sArmPosition;
   private GenericEntry sTragetAngle;
-  private GenericEntry sArmSpeed; 
-
-
+  private GenericEntry sArmSpeed;
 
   /** Creates a new Arm. */
   public Arm() {
@@ -33,22 +31,23 @@ public class Arm extends SubsystemBase {
     this.addChild("Motor", mMotor1);
 
     configureDashboard();
-      }
+  }
 
-      public void move(double speed) {
-        if (Math.abs(speed) < 0.2) speed = 0.2 * Math.signum (speed); 
-        mMotor1.set(speed);
-        
-      }
-    
-      private void configureDashboard() {
-        tab = Shuffleboard.getTab("Arm");
-        driveTab = Shuffleboard.getTab("Driver");
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'configureDashboard'");
-      }
-    
-      @Override
+  public void move(double speed) {
+    if (Math.abs(speed) < 0.2)
+      speed = 0.2 * Math.signum(speed);
+    mMotor1.set(speed);
+
+  }
+
+  private void configureDashboard() {
+    tab = Shuffleboard.getTab("Arm");
+    driveTab = Shuffleboard.getTab("Driver");
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'configureDashboard'");
+  }
+
+  @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }

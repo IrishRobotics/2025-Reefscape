@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj.XboxController;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-public static final int kDriverControllerPort=1;
+  public static final int kDriverControllerPort=1;
+  public static final int kCodriverControllerPort=2;
 
   public static class OpConstants {
     // Drivetrain Constants
@@ -32,7 +33,15 @@ public static final int kDriverControllerPort=1;
     public static final int GearButton = XboxController.Button.kStart.value;
   }
 
-  public static class armConstants {
+  public static class ArmConstants {
     public static final int kArmMotor1 = 8;
+  }
+
+  public static class ElevatorConstants {
+    public static final int elevatorMotor = 7;
+    public static final int elevatorReset = 1;
+    public static final int elevatorEncoder1 = 2;
+    public static final int elevatorEncoder2 = 3;
+
   }
 }

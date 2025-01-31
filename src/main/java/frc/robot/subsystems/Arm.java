@@ -12,11 +12,11 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.armConstants;
+import frc.robot.Constants.ArmConstants;
 
 public class Arm extends SubsystemBase {
 
-  public WPI_TalonSRX mMotor1 = new WPI_TalonSRX(armConstants.kArmMotor1);
+  public WPI_TalonSRX mMotor1 = new WPI_TalonSRX(ArmConstants.kArmMotor1);
 
   private ShuffleboardTab tab;
   private ShuffleboardTab driveTab;

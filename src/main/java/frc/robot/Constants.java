@@ -33,7 +33,12 @@ public final class Constants {
   }
 
   public static class ArmConstants {
+    // Motors
     public static final int kArmMotor1 = 8;
+
+    // Encoders
+    public static final int kAbsEncoder = 1;
+    public static final double kEncoderOffset = 90 / 360;
   }
 
   public static class ElevatorConstants {

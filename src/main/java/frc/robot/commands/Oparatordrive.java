@@ -4,19 +4,18 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drivetrain;
 
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Oparatordrive extends Command {
-  private XboxController mController;  
+  private XboxController mController;
   private Drivetrain sDrive;
   private Boolean mFieldRelative;
+
   /** Creates a new Oparatordrive. */
-  public Oparatordrive(Drivetrain drive, XboxController xboxController,boolean fieldRelative) {
+  public Oparatordrive(Drivetrain drive, XboxController xboxController, boolean fieldRelative) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.mController = xboxController;
     this.sDrive = drive;
@@ -32,7 +31,8 @@ public class Oparatordrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    sDrive.Drive(mController.getRightX(), mController.getRightY(), mController.getLeftX(), mFieldRelative);
+    sDrive.Drive(
+        mController.getRightX(), mController.getRightY(), mController.getLeftX(), mFieldRelative);
   }
 
   // Called once the command ends or is interrupted.

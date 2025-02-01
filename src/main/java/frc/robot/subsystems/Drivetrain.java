@@ -4,34 +4,36 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.*;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import com.revrobotics.spark.*;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class Drivetrain extends SubsystemBase {
   private double speedValue = Constants.OpConstants.kHighGear;
   private AHRS mNavx = new AHRS(NavXComType.kMXP_UART);
 
   // Motors
-  private SparkMax mFrontLeftMotor = new SparkMax(Constants.OpConstants.kFrontLeftID, MotorType.kBrushless);
-  private SparkMax mFrontRightMotor = new SparkMax(Constants.OpConstants.kFrontRightID, MotorType.kBrushless);
-  private SparkMax mRearLeftMotor = new SparkMax(Constants.OpConstants.kRearLeftID, MotorType.kBrushless);
-  private SparkMax mRearRightMotor = new SparkMax(Constants.OpConstants.kRearRightID, MotorType.kBrushless);
+  private SparkMax mFrontLeftMotor =
+      new SparkMax(Constants.OpConstants.kFrontLeftID, MotorType.kBrushless);
+  private SparkMax mFrontRightMotor =
+      new SparkMax(Constants.OpConstants.kFrontRightID, MotorType.kBrushless);
+  private SparkMax mRearLeftMotor =
+      new SparkMax(Constants.OpConstants.kRearLeftID, MotorType.kBrushless);
+  private SparkMax mRearRightMotor =
+      new SparkMax(Constants.OpConstants.kRearRightID, MotorType.kBrushless);
 
   // Menanum Drive
-  private MecanumDrive mMecanumDrive = new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor,
-      mRearRightMotor);
+  private MecanumDrive mMecanumDrive =
+      new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
 
   /** Creates a new Drivetrain. */
-  public Drivetrain() {
-  }
+  public Drivetrain() {}
 
   @Override
   public void periodic() {
@@ -55,7 +57,8 @@ public class Drivetrain extends SubsystemBase {
 
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {
     if (fieldRelitave) {
-      mMecanumDrive.driveCartesian(x * speedValue, y * speedValue, turn * speedValue, mNavx.getRotation2d());
+      mMecanumDrive.driveCartesian(
+          x * speedValue, y * speedValue, turn * speedValue, mNavx.getRotation2d());
     } else {
       mMecanumDrive.driveCartesian(x * speedValue, y * speedValue, turn * speedValue);
     }

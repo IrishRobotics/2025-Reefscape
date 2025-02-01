@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.google.flatbuffers.Constants;
-
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -34,10 +32,8 @@ public class Arm extends SubsystemBase {
   }
 
   public void move(double speed) {
-    if (Math.abs(speed) < 0.2)
-      speed = 0.2 * Math.signum(speed);
+    if (Math.abs(speed) < 0.2) speed = 0.2 * Math.signum(speed);
     mMotor1.set(speed);
-
   }
 
   private void configureDashboard() {

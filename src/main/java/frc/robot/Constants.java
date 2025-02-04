@@ -46,5 +46,9 @@ public final class Constants {
     public static final int elevatorReset = 1;
     public static final int elevatorEncoder1 = 2;
     public static final int elevatorEncoder2 = 3;
+    public static final double pidP = 0.1;
+    public static final double pidI = 0;
+    public static final double pidD = 0;
+    public static final double encoderDistancePerPulse = 1;
   }
 }

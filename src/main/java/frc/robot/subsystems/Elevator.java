@@ -5,6 +5,9 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -15,38 +18,27 @@ import frc.robot.Constants;
 import frc.robot.commands.Elevator.ResetElevator;
 
 public class Elevator extends SubsystemBase {
-    private SparkMax motor =
-        new SparkMax(Constants.ElevatorConstants.elevatorMotor, MotorType.kBrushed);
-    PIDController pid = new PIDController(Constants.ElevatorConstants.pidP, Constants.ElevatorConstants.pidI, Constants.ElevatorConstants.pidD);
+    WPI_TalonSRX motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
   
     private DigitalInput reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
     private Trigger resetTrigger = new Trigger(() -> reset.get());
-    private Encoder encoder =
-        new Encoder(
-            Constants.ElevatorConstants.elevatorEncoder1,
-            Constants.ElevatorConstants.elevatorEncoder2);
-    private double target = 0;
   
     /** Creates a new Elevator. */
     public Elevator() {
-      encoder.setDistancePerPulse(Constants.ElevatorConstants.encoderDistancePerPulse);
-      pid.setTolerance(1, 2);
-  
       resetTrigger.whileTrue(new ResetElevator(this));
-  }
+    }
 
   @Override
   public void periodic() {
-    motor.set(pid.calculate(encoder.getDistance(), target));
   }
 
-  public void setTarget(double _target) {
-    target = _target;
+  public void setTarget(double target) {
+    motor.set(TalonSRXControlMode.MotionMagic, target*Constants.ElevatorConstants.encoderDistancePerPulse);
   }
 
-  public boolean atSetpoint() {return pid.atSetpoint();}
+  public boolean atSetpoint() {return motor.getClosedLoopError() < Constants.ElevatorConstants.aceptableError;}
 
   public void resetEncoder() {
-    encoder.reset();
+    motor.setSelectedSensorPosition(0);
   }
 }

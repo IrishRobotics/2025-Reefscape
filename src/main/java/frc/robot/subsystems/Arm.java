@@ -4,11 +4,7 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -19,17 +15,13 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.ArmConstants;
 import java.util.Map;
 
 public class Arm extends SubsystemBase {
@@ -38,6 +30,7 @@ public class Arm extends SubsystemBase {
   private SparkMaxConfig motorConfig;
   private SparkClosedLoopController closedLoopController = motor.getClosedLoopController();
   private AbsoluteEncoder encoder = motor.getAbsoluteEncoder();
+  private double targetPos;
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
@@ -112,12 +105,12 @@ public class Arm extends SubsystemBase {
   }
 
   public void setTarget(double target){
+    targetPos = target;
     closedLoopController.setReference(target, ControlType.kPosition);
     sArmTarget.setDouble(target);
   }
 
   private boolean atTarget() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'atTarget'");
+    return Math.abs(encoder.getPosition()-targetPos) < Constants.ArmConstants.targetTolerence;
   }
 }

@@ -39,6 +39,8 @@ public final class Constants {
     // Encoders
     public static final int kAbsEncoder = 1;
     public static final double kEncoderOffset = 90 / 360;
+
+    public static final double targetTolerence = 0;
   }
 
   public static class ElevatorConstants {
@@ -48,6 +50,6 @@ public final class Constants {
     public static final double pidI = 0;
     public static final double pidD = 0;
     public static final double encoderDistancePerPulse = 1;
-    public static final double aceptableError = 1;
+    public static final double aceptableError = 0.05;
   }
 }

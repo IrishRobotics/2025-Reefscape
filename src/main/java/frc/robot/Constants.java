@@ -52,4 +52,8 @@ public final class Constants {
     public static final double encoderDistancePerPulse = 1;
     public static final double aceptableError = 0.05;
   }
+
+  public static class IntakeConstants{
+    public static final int elevatorMotor = 6;
+  }
 }

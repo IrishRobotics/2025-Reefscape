@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-  private SparkMax motor = new SparkMax(Constants.IntakeConstants.elevatorMotor, MotorType.kBrushless);
+  private SparkMax motor = new SparkMax(Constants.IntakeConstants.motor, MotorType.kBrushless);
 
   /** Creates a new Intake. */
   public Intake() {

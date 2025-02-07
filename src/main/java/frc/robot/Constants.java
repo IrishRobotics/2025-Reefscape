@@ -34,7 +34,7 @@ public final class Constants {
 
   public static class ArmConstants {
     // Motors
-    public static final int kArmMotor1 = 8;
+    public static final int kArmMotor1 = 7;
 
     // Encoders
     public static final int kAbsEncoder = 1;
@@ -44,7 +44,7 @@ public final class Constants {
   }
 
   public static class ElevatorConstants {
-    public static final int elevatorMotor = 7;
+    public static final int elevatorMotor = 8;
     public static final int elevatorReset = 1;
     public static final double pidP = 0.1;
     public static final double pidI = 0;
@@ -54,6 +54,6 @@ public final class Constants {
   }
 
   public static class IntakeConstants{
-    public static final int elevatorMotor = 6;
+    public static final int motor = 6;
   }
 }

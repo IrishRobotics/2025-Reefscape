@@ -114,7 +114,7 @@ public class Arm extends SubsystemBase {
 
   public double getTarget() {return targetPos;}
 
-  private boolean atTarget() {
+  public boolean atTarget() {
     return Math.abs(encoder.getPosition()-targetPos) < Constants.ArmConstants.targetTolerence;
   }
 }

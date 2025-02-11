@@ -4,14 +4,30 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
+  private SparkMax motor = new SparkMax(Constants.IntakeConstants.elevatorMotor, MotorType.kBrushless);
+
   /** Creates a new Intake. */
-  public Intake() {}
+  public Intake() {
+    setDefaultCommand(IntakeMove(0));
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
+
+  public void move(double speed){
+    motor.set(speed);
+  }
+
+  public Command IntakeMove(double speed) {return new  StartEndCommand(() -> move(speed), () -> move(0), this);}
 }

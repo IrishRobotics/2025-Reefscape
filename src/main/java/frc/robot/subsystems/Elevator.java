@@ -4,33 +4,39 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
-  private SparkMax motor =
-      new SparkMax(Constants.ElevatorConstants.elevatorMotor, MotorType.kBrushed);
-  private SparkClosedLoopController closedLoopController = motor.getClosedLoopController();
-  private SparkMaxConfig motorConfig = new SparkMaxConfig();
-
-  private DigitalInput reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
-  private Encoder encoder =
-      new Encoder(
-          Constants.ElevatorConstants.elevatorEncoder1,
-          Constants.ElevatorConstants.elevatorEncoder2);
-  private double target = 0;
-
-  /** Creates a new Elevator. */
-  public Elevator() {}
+    WPI_TalonSRX motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
+  
+    private DigitalInput reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
+    private Trigger resetTrigger = new Trigger(() -> reset.get());
+  
+    /** Creates a new Elevator. */
+    public Elevator() {
+      resetTrigger.whileTrue(cmdResetElevator());
+    }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+  }
 
-  public void move() {}
+  public void setTarget(double target) {
+    motor.set(TalonSRXControlMode.MotionMagic, target*Constants.ElevatorConstants.encoderDistancePerPulse);
+  }
+
+  public boolean atSetpoint() {return motor.getClosedLoopError() < Constants.ElevatorConstants.aceptableError;}
+
+  public void resetEncoder() {
+    motor.setSelectedSensorPosition(0);
+  }
+
+  //Commands
+  public Command cmdResetElevator() {return this.runOnce(() -> this.resetEncoder());}
 }

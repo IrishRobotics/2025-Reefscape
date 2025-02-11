@@ -33,13 +33,27 @@ public final class Constants {
   }
 
   public static class ArmConstants {
+    // Motors
     public static final int kArmMotor1 = 8;
+
+    // Encoders
+    public static final int kAbsEncoder = 1;
+    public static final double kEncoderOffset = 90 / 360;
+
+    public static final double targetTolerence = 0;
   }
 
   public static class ElevatorConstants {
     public static final int elevatorMotor = 7;
     public static final int elevatorReset = 1;
-    public static final int elevatorEncoder1 = 2;
-    public static final int elevatorEncoder2 = 3;
+    public static final double pidP = 0.1;
+    public static final double pidI = 0;
+    public static final double pidD = 0;
+    public static final double encoderDistancePerPulse = 1;
+    public static final double aceptableError = 0.05;
+  }
+
+  public static class IntakeConstants{
+    public static final int elevatorMotor = 6;
   }
 }

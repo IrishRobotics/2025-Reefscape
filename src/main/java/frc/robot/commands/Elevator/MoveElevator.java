@@ -11,6 +11,7 @@ import frc.robot.subsystems.Elevator;
 public class MoveElevator extends Command {
   Elevator elevator;
   double target;
+
   /** Creates a new MoveElevator. */
   public MoveElevator(Elevator _elevator, double _target) {
     elevator = _elevator;

@@ -41,6 +41,8 @@ public final class Constants {
     public static final double kEncoderOffset = 90 / 360;
 
     public static final double targetTolerence = 0;
+
+    public static final double kArmSpeed = 0.5;
   }
 
   public static class ElevatorConstants {
@@ -53,7 +55,7 @@ public final class Constants {
     public static final double aceptableError = 0.05;
   }
 
-  public static class IntakeConstants{
+  public static class IntakeConstants {
     public static final int motor = 6;
   }
 }

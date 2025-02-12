@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Oparatordrive;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Elevator;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,16 +19,38 @@ import frc.robot.subsystems.Drivetrain;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Drivetrain sDrivetrain = new Drivetrain();
+  private final Drivetrain sDrivetrain;
+  private final Elevator elevator;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final XboxController m_driverController =
-      new XboxController(Constants.kDriverControllerPort);
+  Trigger elevatorUpTrigger;
+  Trigger elevatorDownTrigger;
+
+  // Robot Joysticks/Controllers
+  private final XboxController m_driverController;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    m_driverController = new XboxController(Constants.kDriverControllerPort);
+    sDrivetrain = new Drivetrain();
+    elevator = new Elevator();
+
     // Default Commands
     sDrivetrain.setDefaultCommand(new Oparatordrive(sDrivetrain, m_driverController, false));
+
+    elevatorUpTrigger =
+        new Trigger(
+            () -> {
+              return m_driverController.getPOV() == 0;
+            });
+    elevatorDownTrigger =
+        new Trigger(
+            () -> {
+              return m_driverController.getPOV() == 180;
+            });
+
+    elevatorUpTrigger.whileTrue(elevator.elevatorUp());
+    elevatorDownTrigger.whileFalse(elevator.elevatorDown());
+
     // Configure the trigger bindings
     configureBindings();
   }

@@ -32,7 +32,7 @@ public class Oparatordrive extends Command {
   @Override
   public void execute() {
     sDrive.Drive(
-        mController.getRightX(), mController.getRightY(), mController.getLeftX(), mFieldRelative);
+        mController.getRightY(), mController.getRightX(), mController.getLeftX(), mFieldRelative);
   }
 
   // Called once the command ends or is interrupted.

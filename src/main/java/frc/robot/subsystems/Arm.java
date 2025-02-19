@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.Map;
@@ -128,5 +130,13 @@ public class Arm extends SubsystemBase {
 
   public void stop() {
     motor.set(0);
+  }
+
+  public Command ManualUp() {
+    return new StartEndCommand(() -> up(), () -> stop(), this);
+  }
+
+  public Command ManualDown() {
+    return new StartEndCommand(() -> down(), () -> stop(), this);
   }
 }

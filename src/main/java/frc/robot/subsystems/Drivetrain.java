@@ -33,10 +33,7 @@ public class Drivetrain extends SubsystemBase {
       new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
 
   /** Creates a new Drivetrain. */
-  public Drivetrain() {
-    // TODO remove
-    speedValue = .25;
-  }
+  public Drivetrain() {}
 
   @Override
   public void periodic() {

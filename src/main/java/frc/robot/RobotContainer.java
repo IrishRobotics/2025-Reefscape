@@ -4,12 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.commands.Oparatordrive;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -19,37 +17,40 @@ import frc.robot.subsystems.Elevator;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final Arm sArm;
   private final Drivetrain sDrivetrain;
-  private final Elevator elevator;
+  private final Elevator sElevator;
+  private final Grabber sGrabber;
+  private final Intake sIntake;
 
-  Trigger elevatorUpTrigger;
-  Trigger elevatorDownTrigger;
+  private Trigger t_armUp;
+  private Trigger t_armDown;
+  private Trigger t_driveToggleGear;
+  private Trigger t_elevatorUp;
+  private Trigger t_elevatorDown;
+  private Trigger t_grabberIn;
+  private Trigger t_grabberOut;
+  private Trigger t_intakeIn;
+  private Trigger t_intakeOut;
 
   // Robot Joysticks/Controllers
-  private final XboxController m_driverController;
+  // private final XboxController m_driverController;
+  private final CommandXboxController m_driverController;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_driverController = new XboxController(Constants.kDriverControllerPort);
+    // m_driverController = new XboxController(Constants.kDriverControllerPort);
+    m_driverController = new CommandXboxController(Constants.kDriverControllerPort);
+
     sDrivetrain = new Drivetrain();
-    elevator = new Elevator();
+    sArm = new Arm();
+    sElevator = new Elevator();
+    sGrabber = new Grabber();
+    sIntake = new Intake();
 
     // Default Commands
-    sDrivetrain.setDefaultCommand(new Oparatordrive(sDrivetrain, m_driverController, false));
-
-    elevatorUpTrigger =
-        new Trigger(
-            () -> {
-              return m_driverController.getPOV() == 0;
-            });
-    elevatorDownTrigger =
-        new Trigger(
-            () -> {
-              return m_driverController.getPOV() == 180;
-            });
-
-    elevatorUpTrigger.whileTrue(elevator.elevatorUp());
-    elevatorDownTrigger.whileFalse(elevator.elevatorDown());
+    sDrivetrain.setDefaultCommand(
+        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
 
     // Configure the trigger bindings
     configureBindings();
@@ -66,9 +67,40 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
+
+    // Arm
+    t_armUp = m_driverController.a();
+    t_armUp.whileTrue(sArm.ManualUp());
+
+    t_armDown = m_driverController.b();
+    t_armDown.whileTrue(sArm.ManualDown());
+
+    // Drivetrain
+    t_driveToggleGear = m_driverController.start();
+    t_driveToggleGear.onTrue(sDrivetrain.cmdToggleGear());
+
+    // Elevator
+    t_elevatorUp = m_driverController.pov(0);
+    t_elevatorUp.whileTrue(sElevator.elevatorUp());
+
+    t_elevatorDown = m_driverController.pov(180);
+    t_elevatorDown.whileTrue(sElevator.elevatorDown());
+
+    // Intake
+    t_intakeIn = m_driverController.leftBumper();
+    t_intakeIn.whileTrue(sIntake.In());
+
+    t_intakeOut = m_driverController.rightBumper();
+    t_intakeOut.whileTrue(sIntake.Out());
+
+    // Grabber
+    t_grabberIn = m_driverController.leftTrigger();
+    t_grabberIn.whileTrue(sGrabber.In());
+
+    t_grabberOut = m_driverController.rightTrigger();
+    t_grabberOut.whileTrue(sGrabber.Out());
   }
 
   /**
@@ -76,4 +108,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
+  public Command getAutonomousCommand() {
+    // An example command will be run in autonomous
+    return null;
+  }
 }

@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,12 @@ public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
   public Elevator() {
     resetTrigger.whileTrue(cmdResetElevator());
+
+    TalonSRXConfiguration config = new TalonSRXConfiguration();
+
+    //TODO: FIND VALUES
+
+    motor.configAllSettings(config);
   }
 
   @Override

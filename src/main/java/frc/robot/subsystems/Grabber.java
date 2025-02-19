@@ -9,14 +9,14 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.GrabberConstants;
 
-public class Intake extends SubsystemBase {
+public class Grabber extends SubsystemBase {
   private SparkMax motor;
 
-  /** Creates a new Intake. */
-  public Intake() {
-    motor = new SparkMax(Constants.IntakeConstants.motor, MotorType.kBrushless);
+  /** Creates a new Grabber. */
+  public Grabber() {
+    motor = new SparkMax(GrabberConstants.motor, MotorType.kBrushless);
   }
 
   @Override
@@ -33,10 +33,10 @@ public class Intake extends SubsystemBase {
   }
 
   public Command In() {
-    return new StartEndCommand(() -> move(Constants.IntakeConstants.speed), () -> stop(), this);
+    return new StartEndCommand(() -> move(GrabberConstants.speed), () -> stop(), this);
   }
 
   public Command Out() {
-    return new StartEndCommand(() -> move(-Constants.IntakeConstants.speed), () -> stop(), this);
+    return new StartEndCommand(() -> move(-GrabberConstants.speed), () -> stop(), this);
   }
 }

@@ -15,14 +15,18 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.Arm.MoveArm;
+
 import java.util.Map;
 
 public class Arm extends SubsystemBase {
@@ -39,7 +43,7 @@ public class Arm extends SubsystemBase {
   private GenericEntry sArmPosition;
   private GenericEntry sArmTarget;
   private GenericEntry sArmSpeed;
-  private BooleanEntry sArmAtTarget;
+  private GenericEntry sArmAtTarget;
 
   /** Creates a new Arm. */
   public Arm() {
@@ -65,14 +69,16 @@ public class Arm extends SubsystemBase {
     // This method will be called once per scheduler run
     sArmSpeed.setDouble(motor.get());
     sArmPosition.setDouble(encoder.getPosition() * 360);
-    sArmAtTarget.set(atTarget());
+    sArmAtTarget.setBoolean(atTarget());
   }
 
   private void configureDashboard() {
     tab = Shuffleboard.getTab("Arm");
     driveTab = Shuffleboard.getTab("Driver");
 
-    positionLayout = tab.getLayout("Arm Movment");
+    positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kList);
+
+    SmartDashboard.putData(new MoveArm(this, 0.9));
 
     sArmSpeed =
         positionLayout
@@ -98,7 +104,6 @@ public class Arm extends SubsystemBase {
             .getEntry();
 
     sArmAtTarget =
-        (BooleanEntry)
             positionLayout
                 .add("At Target", false)
                 .withSize(2, 1)

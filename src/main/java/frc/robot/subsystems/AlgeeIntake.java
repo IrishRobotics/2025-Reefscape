@@ -5,18 +5,20 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Intake extends SubsystemBase {
-  private SparkMax motor;
+public class AlgeeIntake extends SubsystemBase {
+  private TalonSRX motor = new TalonSRX(Constants.IntakeConstants.motor);
 
   /** Creates a new Intake. */
-  public Intake() {
-    motor = new SparkMax(Constants.IntakeConstants.motor, MotorType.kBrushless);
+  public AlgeeIntake() {
+    
   }
 
   @Override
@@ -25,11 +27,11 @@ public class Intake extends SubsystemBase {
   }
 
   public void move(double speed) {
-    motor.set(speed);
+    motor.set(TalonSRXControlMode.Position, speed);
   }
 
   public void stop() {
-    motor.stopMotor();
+    motor.set(TalonSRXControlMode.Position, 0);
   }
 
   public Command In() {

@@ -21,7 +21,7 @@ public class RobotContainer {
   private final Drivetrain sDrivetrain;
   private final Elevator sElevator;
   private final Grabber sGrabber;
-  private final Intake sIntake;
+  private final AlgeeIntake sIntake;
 
   private Trigger t_armUp;
   private Trigger t_armDown;
@@ -46,7 +46,7 @@ public class RobotContainer {
     sArm = new Arm();
     sElevator = new Elevator();
     sGrabber = new Grabber();
-    sIntake = new Intake();
+    sIntake = new AlgeeIntake();
 
     // Default Commands
     sDrivetrain.setDefaultCommand(

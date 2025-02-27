@@ -34,6 +34,7 @@ public class Elevator extends SubsystemBase {
   private Trigger resetTrigger = new Trigger(() -> reset.get());
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
+  private ShuffleboardLayout movementLayout;
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -76,12 +77,12 @@ public class Elevator extends SubsystemBase {
         .withWidget(BuiltInWidgets.kNumberBar)
         .withProperties(Map.of("min", -1, "max", 1));
 
-    SmartDashboard.putData("Elevator 10", new MoveElevator(this, 10));
-    SmartDashboard.putData("Elevator Top", new MoveElevator(this, 12.2));
-    SmartDashboard.putData("Elevator 0", new MoveElevator(this, 0));
-    SmartDashboard.putData("Elevator Down", elevatorDown());
-    SmartDashboard.putData("Elevator Up", elevatorUp());
-
+    movementLayout = tab.getLayout("Movement");
+    
+    movementLayout.add("Elevator 0", new MoveElevator(this, 0));
+    movementLayout.add("Elevator Top", new MoveElevator(this, 12.2));
+    movementLayout.add("Elevator Down", elevatorDown());
+    movementLayout.add("Elevator Up", elevatorUp());
 
     resetTrigger.whileTrue(cmdResetElevator());
 

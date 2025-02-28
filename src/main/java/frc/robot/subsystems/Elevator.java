@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.LayoutType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -77,7 +78,7 @@ public class Elevator extends SubsystemBase {
         .withWidget(BuiltInWidgets.kNumberBar)
         .withProperties(Map.of("min", -1, "max", 1));
 
-    movementLayout = tab.getLayout("Movement");
+    movementLayout = tab.getLayout("Movement", BuiltInLayouts.kGrid);
     
     movementLayout.add("Elevator 0", new MoveElevator(this, 0));
     movementLayout.add("Elevator Top", new MoveElevator(this, 12.2));

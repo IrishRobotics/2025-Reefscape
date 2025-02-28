@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -15,6 +16,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -31,35 +33,35 @@ import java.util.Map;
 
 public class Arm extends SubsystemBase {
   // Motor
-  private SparkMax motor = new SparkMax(Constants.ArmConstants.kArmMotor1, MotorType.kBrushed);
+  private SparkMax motor;
   private SparkMaxConfig motorConfig;
-  private SparkClosedLoopController closedLoopController = motor.getClosedLoopController();
-  private AbsoluteEncoder encoder = motor.getAbsoluteEncoder();
+  private SparkClosedLoopController closedLoopController ;
+  private RelativeEncoder encoder ;
   private double targetPos;
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
   private ShuffleboardTab driveTab;
-  private GenericEntry sArmPosition;
   private GenericEntry sArmTarget;
-  private GenericEntry sArmSpeed;
-  private GenericEntry sArmAtTarget;
 
   /** Creates a new Arm. */
   public Arm() {
+    motor = new SparkMax(Constants.ArmConstants.kArmMotor1, MotorType.kBrushed);
+    
     motorConfig = new SparkMaxConfig();
-
-    motorConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-
     motorConfig
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .p(0.1)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(15)
         .i(0)
         .d(0)
         .outputRange(-1, 1);
+    motorConfig.encoder.positionConversionFactor(0.5);
+        
 
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    closedLoopController = motor.getClosedLoopController();
+    encoder = motor.getEncoder();
 
     configureDashboard();
   }
@@ -67,54 +69,55 @@ public class Arm extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    sArmSpeed.setDouble(motor.get());
-    sArmPosition.setDouble(encoder.getPosition() * 360);
-    sArmAtTarget.setBoolean(atTarget());
+    SmartDashboard.putNumber("Arm Val", encoder.getPosition());
+
+    sArmTarget.set(NetworkTableValue.makeDouble(getTarget()));
   }
 
   private void configureDashboard() {
     tab = Shuffleboard.getTab("Arm");
     driveTab = Shuffleboard.getTab("Driver");
 
-    positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kList);
+    positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kGrid).withSize(2, 3);
+    tab.add("Arm 90",new MoveArm(this, 90));
+    tab.add("Arm 00",new MoveArm(this, 0));
+    tab.add("Arm Up",this.ManualUp());
+    tab.add("Arm Down",this.ManualDown());
 
-    SmartDashboard.putData(new MoveArm(this, 0.9));
+    SmartDashboard.putData("Arm Down", ManualDown());
+    SmartDashboard.putData("Arm Up", ManualUp());
 
-    sArmSpeed =
-        positionLayout
-            .add("Speed", 0)
-            .withWidget(BuiltInWidgets.kNumberSlider)
-            .withProperties(Map.of("min", -1, "max", 1))
-            .getEntry();
 
-    sArmPosition =
-        positionLayout
-            .add("Position", encoder.getPosition() * 360)
-            .withSize(2, 2)
-            .withWidget(BuiltInWidgets.kGyro)
-            .withProperties(Map.of("startingAngle", 270))
-            .getEntry();
+    positionLayout
+        .addDouble("Speed", motor::get)
+        .withSize(2, 1)
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", -1, "max", 1));
+
+    positionLayout
+        .addDouble("Position", encoder::getPosition)
+        .withSize(1, 1)
+        .withWidget(BuiltInWidgets.kTextView)
+        .withProperties(Map.of("startingAngle", 270));
 
     sArmTarget =
         positionLayout
             .add("Target", 0)
-            .withSize(2, 2)
+            .withSize(1, 1)
             .withWidget(BuiltInWidgets.kGyro)
             .withProperties(Map.of("startingAngle", 270))
             .getEntry();
 
-    sArmAtTarget =
-            positionLayout
-                .add("At Target", false)
-                .withSize(2, 1)
-                .withWidget(BuiltInWidgets.kBooleanBox)
-                .getEntry();
+    positionLayout
+        .addBoolean("At Target", this::atTarget)
+        .withSize(2, 1)
+        .withWidget(BuiltInWidgets.kBooleanBox);
   }
 
-  public void setTarget(double target) {
-    targetPos = target;
-    closedLoopController.setReference(target, ControlType.kPosition);
-    sArmTarget.setDouble(target);
+  public void setTarget(double targetAngle) {
+    targetPos = targetAngle/360;
+    closedLoopController.setReference(targetAngle/360, ControlType.kPosition);
+    sArmTarget.setDouble(targetAngle);
   }
 
   public double getTarget() {

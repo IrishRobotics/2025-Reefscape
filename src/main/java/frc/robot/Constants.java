@@ -40,7 +40,7 @@ public final class Constants {
     public static final int kAbsEncoder = 1;
     public static final double kEncoderOffset = 90 / 360;
 
-    public static final double targetTolerence = 0;
+    public static final double targetTolerence = 0.02;
 
     public static final double kArmSpeed = 0.5;
   }

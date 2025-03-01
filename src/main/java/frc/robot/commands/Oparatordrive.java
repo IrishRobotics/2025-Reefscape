@@ -31,8 +31,15 @@ public class Oparatordrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double x,y,z;
+
+    x = mController.getRightX() *mController.getRightX() * Math.signum(mController.getRightX());
+    y = mController.getRightY() *mController.getRightY() * Math.signum(mController.getRightY());
+    z = mController.getLeftX() *mController.getLeftX() * Math.signum(mController.getLeftX());
+   
+
     sDrive.Drive(
-        mController.getRightY(), mController.getRightX(), mController.getLeftX(), mFieldRelative);
+        -y, x, mController.getLeftX(), mFieldRelative);
   }
 
   // Called once the command ends or is interrupted.

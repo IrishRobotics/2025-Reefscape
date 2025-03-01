@@ -24,7 +24,7 @@ public final class Constants {
     public static final int kFrontRightID = 2;
     public static final int kRearLeftID = 3;
     public static final int kRearRightID = 4;
-    public static final double kHighGear = 1;
+    public static final double kHighGear = 0.8;
     public static final double kLowGear = 0.6;
     public static final double kMaxSpeed = 0.8;
 
@@ -35,7 +35,8 @@ public final class Constants {
   public static class ArmConstants {
     // Motors
     public static final int kArmMotor1 = 9;
-
+    //DIO
+    public static final int kLowerLimit = 1;
     // Encoders
     public static final int kAbsEncoder = 1;
     public static final double kEncoderOffset = 90 / 360;

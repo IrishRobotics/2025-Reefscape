@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -133,7 +134,7 @@ public class Arm extends SubsystemBase {
   }
 
   private void down() {
-    motor.set(Constants.ArmConstants.kArmSpeed);
+    motor.set(-Constants.ArmConstants.kArmSpeed);
   }
 
   public void stop() {

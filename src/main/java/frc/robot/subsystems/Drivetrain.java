@@ -16,7 +16,7 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
   private double speedValue = Constants.OpConstants.kHighGear;
-  private AHRS mNavx = new AHRS(NavXComType.kMXP_UART);
+  private AHRS mNavx = new AHRS(NavXComType.kMXP_SPI);
 
   // Motors
   private SparkMax mFrontLeftMotor =

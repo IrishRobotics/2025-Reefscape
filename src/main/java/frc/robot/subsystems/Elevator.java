@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,15 +31,19 @@ import frc.robot.Constants;
 import frc.robot.commands.Elevator.MoveElevator;
 
 public class Elevator extends SubsystemBase {
-  private WPI_TalonSRX motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
-  private DigitalInput reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
-  private Trigger resetTrigger = new Trigger(() -> reset.get());
+  private WPI_TalonSRX motor;
+  private DigitalInput reset;
+  private Trigger resetTrigger;
+
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
   private ShuffleboardLayout movementLayout;
 
   /** Creates a new Elevator. */
   public Elevator() {
+    motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
+   reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
+   resetTrigger = new Trigger(() -> reset.get());
     TalonSRXConfiguration config = new TalonSRXConfiguration();
 
     config.motionAcceleration = 0.1;
@@ -48,11 +53,8 @@ public class Elevator extends SubsystemBase {
     //TODO: FIND VALUES
 
     motor.configAllSettings(config);
-
     motor.setSensorPhase(true);
-
     motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-
     motor.configAllowableClosedloopError(0, 128);
 
 		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
@@ -103,8 +105,20 @@ public class Elevator extends SubsystemBase {
     return motor.getClosedLoopError() < Constants.ElevatorConstants.aceptableError;
   }
 
+  public boolean atLowerLimit(){
+    return reset.get();
+  }
+
   public void resetEncoder() {
     motor.setSelectedSensorPosition(0);
+  }
+
+  public void down(){
+    if(!atLowerLimit()){
+      motor.set(.5);
+    }else{
+      motor.set(0);
+    }
   }
 
   // Commands
@@ -113,10 +127,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command elevatorUp() {
-    return new StartEndCommand(() -> motor.set(.5), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(-.5), () -> motor.set(0), this);
   }
 
   public Command elevatorDown() {
-    return new StartEndCommand(() -> motor.set(-.5), () -> motor.set(0), this);
+    // return new FunctionalCommand(() -> motor.set(.5), () -> motor.set(.5), () -> motor.set(0), atLowerLimit(), this);
+    return new StartEndCommand(() -> motor.set(.5), () -> motor.set(0), this);
   }
 }

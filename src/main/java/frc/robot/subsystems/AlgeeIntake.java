@@ -27,11 +27,11 @@ public class AlgeeIntake extends SubsystemBase {
   }
 
   public void move(double speed) {
-    motor.set(TalonSRXControlMode.Position, speed);
+    motor.set(TalonSRXControlMode.PercentOutput, speed);
   }
 
   public void stop() {
-    motor.set(TalonSRXControlMode.Position, 0);
+    motor.set(TalonSRXControlMode.PercentOutput, 0);
   }
 
   public Command In() {

@@ -5,7 +5,11 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.spark.SparkMax;
+
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,7 +20,7 @@ public class Grabber extends SubsystemBase {
 
   /** Creates a new Grabber. */
   public Grabber() {
-    motor = new SparkMax(GrabberConstants.motor, MotorType.kBrushless);
+    motor = new SparkMax(GrabberConstants.motor,MotorType.kBrushless);
   }
 
   @Override
@@ -29,7 +33,7 @@ public class Grabber extends SubsystemBase {
   }
 
   public void stop() {
-    motor.stopMotor();
+    motor.set(0);
   }
 
   public Command In() {

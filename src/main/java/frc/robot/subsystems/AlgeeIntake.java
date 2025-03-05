@@ -4,21 +4,20 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class AlgeeIntake extends SubsystemBase {
-  private TalonSRX motor = new TalonSRX(Constants.IntakeConstants.motor);
+  private TalonSRX mMotor;
 
   /** Creates a new Intake. */
   public AlgeeIntake() {
-    
+    setName("Algae Intake");
+    mMotor = new TalonSRX(Constants.IntakeConstants.motor);
   }
 
   @Override
@@ -27,11 +26,11 @@ public class AlgeeIntake extends SubsystemBase {
   }
 
   public void move(double speed) {
-    motor.set(TalonSRXControlMode.PercentOutput, speed);
+    mMotor.set(TalonSRXControlMode.PercentOutput, speed);
   }
 
   public void stop() {
-    motor.set(TalonSRXControlMode.PercentOutput, 0);
+    mMotor.set(TalonSRXControlMode.PercentOutput, 0);
   }
 
   public Command In() {

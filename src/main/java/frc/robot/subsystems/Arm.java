@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -15,41 +14,38 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTableValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.commands.Arm.MoveArm;
-
 import java.util.Map;
 
 public class Arm extends SubsystemBase {
   // Motor
   private SparkMax motor;
   private SparkMaxConfig motorConfig;
-  private SparkClosedLoopController closedLoopController ;
-  private RelativeEncoder encoder ;
+  private SparkClosedLoopController closedLoopController;
+  private RelativeEncoder encoder;
   private double targetPos;
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
   private ShuffleboardTab driveTab;
   private GenericEntry sArmTarget;
+  private GenericEntry sArmAngle;
 
   /** Creates a new Arm. */
   public Arm() {
+    setName("Arm");
     motor = new SparkMax(Constants.ArmConstants.kArmMotor1, MotorType.kBrushed);
-    
+
     motorConfig = new SparkMaxConfig();
     motorConfig
         .closedLoop
@@ -60,7 +56,6 @@ public class Arm extends SubsystemBase {
         .outputRange(-1, 1);
     motorConfig.encoder.positionConversionFactor(0.5);
     motorConfig.idleMode(IdleMode.kBrake);
-        
 
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motor.getClosedLoopController();
@@ -72,9 +67,8 @@ public class Arm extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Arm Val", encoder.getPosition());
-
-    sArmTarget.set(NetworkTableValue.makeDouble(getTarget()));
+    sArmTarget.setDouble(getTarget());
+    sArmAngle.setDouble(getAngle());
   }
 
   private void configureDashboard() {
@@ -82,14 +76,10 @@ public class Arm extends SubsystemBase {
     driveTab = Shuffleboard.getTab("Driver");
 
     positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kGrid).withSize(2, 3);
-    tab.add("Arm 90",new MoveArm(this, 90));
-    tab.add("Arm 00",new MoveArm(this, 0));
-    tab.add("Arm Up",this.ManualUp());
-    tab.add("Arm Down",this.ManualDown());
-
-    SmartDashboard.putData("Arm Down", ManualDown());
-    SmartDashboard.putData("Arm Up", ManualUp());
-
+    tab.add("Arm 90", new MoveArm(this, 90));
+    tab.add("Arm 00", new MoveArm(this, 0));
+    tab.add("Arm Up", this.ManualUp());
+    tab.add("Arm Down", this.ManualDown());
 
     positionLayout
         .addDouble("Speed", motor::get)
@@ -118,8 +108,8 @@ public class Arm extends SubsystemBase {
   }
 
   public void setTarget(double targetAngle) {
-    targetPos = targetAngle/360;
-    closedLoopController.setReference(targetAngle/360, ControlType.kPosition);
+    targetPos = targetAngle / 360;
+    closedLoopController.setReference(targetAngle / 360, ControlType.kPosition);
     sArmTarget.setDouble(targetAngle);
   }
 
@@ -127,8 +117,12 @@ public class Arm extends SubsystemBase {
     return targetPos;
   }
 
+  public double getAngle() {
+    return encoder.getPosition() * 360;
+  }
+
   public boolean atTarget() {
-    return Math.abs(encoder.getPosition() - targetPos) < Constants.ArmConstants.targetTolerence;
+    return Math.abs(getAngle() - targetPos) < Constants.ArmConstants.targetTolerence;
   }
 
   private void up() {

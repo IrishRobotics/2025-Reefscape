@@ -4,122 +4,123 @@
 
 package frc.robot.subsystems;
 
-import java.util.Map;
-
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
-import com.ctre.phoenix.motorcontrol.can.BaseTalonPIDSetConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.LayoutType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.SuppliedValueWidget;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.commands.Elevator.MoveElevator;
+import java.util.Map;
 
 public class Elevator extends SubsystemBase {
   private WPI_TalonSRX motor;
+  private TalonSRXConfiguration config;
   private DigitalInput reset;
+
   private Trigger resetTrigger;
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
   private ShuffleboardLayout movementLayout;
+  private GenericEntry sTarget;
+  private GenericEntry sPosition;
+  private GenericEntry sSpeed;
 
   /** Creates a new Elevator. */
   public Elevator() {
-    motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
-   reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
-   resetTrigger = new Trigger(() -> reset.get());
-    TalonSRXConfiguration config = new TalonSRXConfiguration();
+    setName("Elevator");
 
+    motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
+    reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
+    resetTrigger = new Trigger(() -> reset.get());
+
+    config = new TalonSRXConfiguration();
     config.motionAcceleration = 0.1;
     config.motionCruiseVelocity = 1.2;
-    
-    
-    //TODO: FIND VALUES
+
+    // TODO: FIND VALUES
     motor.configAllSettings(config);
     motor.setNeutralMode(NeutralMode.Brake);
     motor.setSensorPhase(true);
     motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
     motor.configAllowableClosedloopError(0, 128);
 
-		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
-		motor.config_kP(0, Constants.ElevatorConstants.pidP);
-		motor.config_kI(0, Constants.ElevatorConstants.pidI);
-		motor.config_kD(0, Constants.ElevatorConstants.pidD);
+    /* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
+    motor.config_kP(0, Constants.ElevatorConstants.pidP);
+    motor.config_kI(0, Constants.ElevatorConstants.pidI);
+    motor.config_kD(0, Constants.ElevatorConstants.pidD);
 
+    resetTrigger.whileTrue(cmdResetElevator());
+
+    configureDashboard();
+  }
+
+  @Override
+  public void periodic() {
+    sTarget.setDouble(motor.getClosedLoopTarget());
+    sPosition.setDouble(motor.getSelectedSensorPosition());
+    sSpeed.setDouble(motor.getMotorOutputPercent());
+  }
+
+  public void configureDashboard() {
     tab = Shuffleboard.getTab("Elevator");
     positionLayout = tab.getLayout("Elevator Movment", BuiltInLayouts.kList);
 
-    positionLayout
-        .addDouble("Target", motor::getClosedLoopTarget)
-        .withWidget(BuiltInWidgets.kNumberBar)
-        .withProperties(Map.of("min", -100, "max", 50000));
-        
-    positionLayout
-        .addDouble("Position", motor::getSelectedSensorPosition)
-        .withWidget(BuiltInWidgets.kNumberBar)
-        .withProperties(Map.of("min", -100, "max", 50000));
-    
-    positionLayout
-        .addDouble("Speed", motor::get)
-        .withWidget(BuiltInWidgets.kNumberBar)
-        .withProperties(Map.of("min", -1, "max", 1));
+    sTarget =
+        positionLayout
+            .add("Target", 0)
+            .withWidget(BuiltInWidgets.kTextView)
+            // .withProperties(Map.of("min", -100, "max", 50000))
+            .getEntry();
+
+    sPosition =
+        positionLayout
+            .add("Position", 0)
+            .withWidget(BuiltInWidgets.kEncoder)
+            // .withProperties(Map.of("min", -100, "max", 50000))
+            .getEntry();
+
+    sSpeed =
+        positionLayout
+            .add("Speed", 0)
+            .withWidget(BuiltInWidgets.kNumberBar)
+            .withProperties(Map.of("min", -1, "max", 1))
+            .getEntry();
 
     movementLayout = tab.getLayout("Movement", BuiltInLayouts.kGrid);
-    
     movementLayout.add("Elevator 0", new MoveElevator(this, 0));
     movementLayout.add("Elevator Top", new MoveElevator(this, 12.2));
     movementLayout.add("Elevator Down", elevatorDown());
     movementLayout.add("Elevator Up", elevatorUp());
-
-    resetTrigger.whileTrue(cmdResetElevator());
-
   }
 
-  @Override
-  public void periodic() {}
-
   public void setTarget(double target) {
-    System.out.println("Target: "+target);
     motor.set(
-        TalonSRXControlMode.Position,
-        target * Constants.ElevatorConstants.encoderDistancePerPulse);
+        TalonSRXControlMode.Position, target * Constants.ElevatorConstants.encoderDistancePerPulse);
   }
 
   public boolean atSetpoint() {
     return motor.getClosedLoopError() < Constants.ElevatorConstants.aceptableError;
   }
 
-  public boolean atLowerLimit(){
+  public boolean atLowerLimit() {
     return reset.get();
   }
 
   public void resetEncoder() {
     motor.setSelectedSensorPosition(0);
-  }
-
-  public void down(){
-    if(!atLowerLimit()){
-      motor.set(.5);
-    }else{
-      motor.set(0);
-    }
   }
 
   // Commands
@@ -132,7 +133,6 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command elevatorDown() {
-    // return new FunctionalCommand(() -> motor.set(.5), () -> motor.set(.5), () -> motor.set(0), atLowerLimit(), this);
     return new StartEndCommand(() -> motor.set(.75), () -> motor.set(0), this);
   }
 }

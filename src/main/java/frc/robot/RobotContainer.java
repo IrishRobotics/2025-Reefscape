@@ -51,7 +51,8 @@ public class RobotContainer {
     sIntake = new AlgeeIntake();
 
     // Default Commands
-    sDrivetrain.setDefaultCommand(        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
+    sDrivetrain.setDefaultCommand(
+        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
 
     // Configure the trigger bindings
     configureBindings();

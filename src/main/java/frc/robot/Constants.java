@@ -35,7 +35,7 @@ public final class Constants {
   public static class ArmConstants {
     // Motors
     public static final int kArmMotor1 = 9;
-    //DIO
+    // DIO
     public static final int kLowerLimit = 1;
     // Encoders
     public static final int kAbsEncoder = 1;

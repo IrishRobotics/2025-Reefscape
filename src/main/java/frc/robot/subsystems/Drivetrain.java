@@ -6,12 +6,16 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -19,44 +23,81 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
-  private double speedValue = Constants.OpConstants.kLowGear;
-  private AHRS mNavx = new AHRS(NavXComType.kMXP_SPI);
+  private double speedValue;
 
   // Motors
-  private SparkMax mFrontLeftMotor =
-      new SparkMax(Constants.OpConstants.kFrontLeftID, MotorType.kBrushless);
-  private SparkMax mFrontRightMotor =
-      new SparkMax(Constants.OpConstants.kFrontRightID, MotorType.kBrushless);
-  private SparkMax mRearLeftMotor =
-      new SparkMax(Constants.OpConstants.kRearLeftID, MotorType.kBrushless);
-  private SparkMax mRearRightMotor =
-      new SparkMax(Constants.OpConstants.kRearRightID, MotorType.kBrushless);
+  private SparkMax mFrontLeftMotor;
+  private SparkMax mFrontRightMotor;
+  private SparkMax mRearLeftMotor;
+  private SparkMax mRearRightMotor;
+  private SparkMaxConfig mLeftConfig;
+  private SparkMaxConfig mRightConfig;
 
   // Menanum Drive
-  private MecanumDrive mMecanumDrive =
-      new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
+  private MecanumDrive mMecanumDrive;
+
+  // Sensors
+  private AHRS mNavx;
+
+  // Dashboard
+  private ShuffleboardTab tab;
+  private ShuffleboardTab driveTab;
+  private GenericEntry sArmTarget;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
-    SparkMaxConfig mLeftConfig = new SparkMaxConfig();
-    SparkMaxConfig mRightConfig = new SparkMaxConfig();
+    setName("Drivetrain");
+
+    // Motors
+    mLeftConfig = new SparkMaxConfig();
     mLeftConfig.idleMode(IdleMode.kBrake);
+
+    mRightConfig = new SparkMaxConfig();
     mRightConfig.idleMode(IdleMode.kBrake);
     mRightConfig.inverted(true);
 
-    mFrontLeftMotor.configure(mLeftConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    mRearLeftMotor.configure(mLeftConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    mFrontLeftMotor = new SparkMax(Constants.OpConstants.kFrontLeftID, MotorType.kBrushless);
+    mFrontLeftMotor.configure(
+        mLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    mFrontRightMotor.configure(mRightConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    mRearRightMotor.configure(mRightConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    mFrontRightMotor = new SparkMax(Constants.OpConstants.kFrontRightID, MotorType.kBrushless);
+    mFrontRightMotor.configure(
+        mRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    mNavx.resetDisplacement();
-    SmartDashboard.putData("Reset Gyro",cmdResetGyro());
+    mRearLeftMotor = new SparkMax(Constants.OpConstants.kRearLeftID, MotorType.kBrushless);
+    mRearLeftMotor.configure(
+        mLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    mRearRightMotor = new SparkMax(Constants.OpConstants.kRearRightID, MotorType.kBrushless);
+    mRearRightMotor.configure(
+        mRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Mecanum Drive
+    mMecanumDrive =
+        new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
+
+    // Sensors
+    mNavx = new AHRS(NavXComType.kMXP_SPI);
+    mNavx.enableLogging(true);
+
+    // Set Default Values
+    speedValue = Constants.OpConstants.kLowGear;
+
+    configureDashboard();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  private void configureDashboard() {
+    tab = Shuffleboard.getTab("Drivetrain");
+    driveTab = Shuffleboard.getTab("Driver");
+
+    tab.add(this);
+    tab.add("Toggle Gear", cmdToggleGear());
+    tab.add("Reset Gyro", cmdResetGyro());
   }
 
   public void ToggleGear() {
@@ -69,15 +110,6 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  // Commands
-  public Command cmdToggleGear() {
-    return this.runOnce(this::ToggleGear);
-  }
-
-  public Command cmdResetGyro(){
-    return new InstantCommand(()-> mNavx.reset(),this);
-  }
-
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {
     if (fieldRelitave) {
       mMecanumDrive.driveCartesian(
@@ -85,5 +117,14 @@ public class Drivetrain extends SubsystemBase {
     } else {
       mMecanumDrive.driveCartesian(x * speedValue, y * speedValue, turn * speedValue);
     }
+  }
+
+  // Commands
+  public Command cmdToggleGear() {
+    return this.runOnce(this::ToggleGear);
+  }
+
+  public Command cmdResetGyro() {
+    return new InstantCommand(() -> mNavx.reset(), this);
   }
 }

@@ -5,17 +5,21 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.*;
+import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
-  private double speedValue = Constants.OpConstants.kHighGear;
+  private double speedValue = Constants.OpConstants.kLowGear;
   private AHRS mNavx = new AHRS(NavXComType.kMXP_SPI);
 
   // Motors
@@ -33,7 +37,22 @@ public class Drivetrain extends SubsystemBase {
       new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
 
   /** Creates a new Drivetrain. */
-  public Drivetrain() {}
+  public Drivetrain() {
+    SparkMaxConfig mLeftConfig = new SparkMaxConfig();
+    SparkMaxConfig mRightConfig = new SparkMaxConfig();
+    mLeftConfig.idleMode(IdleMode.kBrake);
+    mRightConfig.idleMode(IdleMode.kBrake);
+    mRightConfig.inverted(true);
+
+    mFrontLeftMotor.configure(mLeftConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    mRearLeftMotor.configure(mLeftConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    mFrontRightMotor.configure(mRightConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    mRearRightMotor.configure(mRightConfig, com.revrobotics.spark.SparkBase.ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    mNavx.resetDisplacement();
+    SmartDashboard.putData("Reset Gyro",cmdResetGyro());
+  }
 
   @Override
   public void periodic() {
@@ -53,6 +72,10 @@ public class Drivetrain extends SubsystemBase {
   // Commands
   public Command cmdToggleGear() {
     return this.runOnce(this::ToggleGear);
+  }
+
+  public Command cmdResetGyro(){
+    return new InstantCommand(()-> mNavx.reset(),this);
   }
 
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {

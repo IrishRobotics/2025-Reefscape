@@ -36,11 +36,13 @@ public class RobotContainer {
   // Robot Joysticks/Controllers
   // private final XboxController m_driverController;
   private final CommandXboxController m_driverController;
+  private final CommandXboxController m_coDriverController;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // m_driverController = new XboxController(Constants.kDriverControllerPort);
     m_driverController = new CommandXboxController(Constants.kDriverControllerPort);
+    m_coDriverController = new CommandXboxController(Constants.kCoDriverControllerPort);
 
     sDrivetrain = new Drivetrain();
     sArm = new Arm();
@@ -49,8 +51,7 @@ public class RobotContainer {
     sIntake = new AlgeeIntake();
 
     // Default Commands
-    sDrivetrain.setDefaultCommand(
-        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
+    sDrivetrain.setDefaultCommand(        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
 
     // Configure the trigger bindings
     configureBindings();
@@ -71,10 +72,10 @@ public class RobotContainer {
     // cancelling on release.
 
     // Arm
-    t_armUp = m_driverController.a();
+    t_armUp = m_coDriverController.y();
     t_armUp.whileTrue(sArm.ManualUp());
 
-    t_armDown = m_driverController.b();
+    t_armDown = m_coDriverController.a();
     t_armDown.whileTrue(sArm.ManualDown());
 
     // Drivetrain
@@ -82,24 +83,24 @@ public class RobotContainer {
     t_driveToggleGear.onTrue(sDrivetrain.cmdToggleGear());
 
     // Elevator
-    t_elevatorUp = m_driverController.pov(0);
+    t_elevatorUp = m_coDriverController.pov(0);
     t_elevatorUp.whileTrue(sElevator.elevatorUp());
 
-    t_elevatorDown = m_driverController.pov(180);
+    t_elevatorDown = m_coDriverController.pov(180);
     t_elevatorDown.whileTrue(sElevator.elevatorDown());
 
     // Intake
-    t_intakeIn = m_driverController.leftBumper();
+    t_intakeIn = m_coDriverController.leftBumper();
     t_intakeIn.whileTrue(sIntake.In());
 
-    t_intakeOut = m_driverController.rightBumper();
+    t_intakeOut = m_coDriverController.rightBumper();
     t_intakeOut.whileTrue(sIntake.Out());
 
     // Grabber
-    t_grabberIn = m_driverController.leftTrigger();
+    t_grabberIn = m_coDriverController.leftTrigger();
     t_grabberIn.whileTrue(sGrabber.In());
 
-    t_grabberOut = m_driverController.rightTrigger();
+    t_grabberOut = m_coDriverController.rightTrigger();
     t_grabberOut.whileTrue(sGrabber.Out());
   }
 

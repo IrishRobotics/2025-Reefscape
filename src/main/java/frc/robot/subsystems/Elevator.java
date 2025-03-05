@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseTalonPIDSetConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
@@ -48,11 +49,11 @@ public class Elevator extends SubsystemBase {
 
     config.motionAcceleration = 0.1;
     config.motionCruiseVelocity = 1.2;
-
+    
     
     //TODO: FIND VALUES
-
     motor.configAllSettings(config);
+    motor.setNeutralMode(NeutralMode.Brake);
     motor.setSensorPhase(true);
     motor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
     motor.configAllowableClosedloopError(0, 128);
@@ -127,11 +128,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command elevatorUp() {
-    return new StartEndCommand(() -> motor.set(-.5), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(-.75), () -> motor.set(0), this);
   }
 
   public Command elevatorDown() {
     // return new FunctionalCommand(() -> motor.set(.5), () -> motor.set(.5), () -> motor.set(0), atLowerLimit(), this);
-    return new StartEndCommand(() -> motor.set(.5), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(.75), () -> motor.set(0), this);
   }
 }

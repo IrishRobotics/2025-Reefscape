@@ -29,7 +29,7 @@ public class Grabber extends SubsystemBase {
   }
 
   public void move(double speed) {
-    motor.set(speed);
+    motor.set(-speed);
   }
 
   public void stop() {

@@ -25,7 +25,9 @@ public class Grabber extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void configureDashboard() {}
+  public void configureDashboard() {
+    System.out.println("Grabber Shuffleboard Set Up");
+  }
 
   public void move(double speed) {
     motor.set(-speed);

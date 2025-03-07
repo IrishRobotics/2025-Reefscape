@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -44,7 +46,7 @@ public class Elevator extends SubsystemBase {
 
     motor = new WPI_TalonSRX(Constants.ElevatorConstants.elevatorMotor);
     reset = new DigitalInput(Constants.ElevatorConstants.elevatorReset);
-    resetTrigger = new Trigger(() -> reset.get());
+    resetTrigger = new Trigger(reset::get);
 
     config = new TalonSRXConfiguration();
     config.motionAcceleration = 0.1;
@@ -62,21 +64,27 @@ public class Elevator extends SubsystemBase {
     motor.config_kI(0, Constants.ElevatorConstants.pidI);
     motor.config_kD(0, Constants.ElevatorConstants.pidD);
 
-    resetTrigger.whileTrue(cmdResetElevator());
+    resetTrigger.whileTrue(new RepeatCommand(cmdResetElevator()));
 
     configureDashboard();
   }
 
   @Override
   public void periodic() {
-    sTarget.setDouble(motor.getClosedLoopTarget());
-    sPosition.setDouble(motor.getSelectedSensorPosition());
+    if (motor.getControlMode() == ControlMode.Position)
+      sTarget.setDouble(motor.getClosedLoopTarget());
+    else sTarget.setDouble(Double.NaN);
+    
+    sPosition.setDouble(
+        motor.getSelectedSensorPosition()
+            / Constants.ElevatorConstants.encoderDistancePerPulse
+            * Constants.ElevatorConstants.heightPerEncoderDistance);
     sSpeed.setDouble(motor.getMotorOutputPercent());
   }
 
   public void configureDashboard() {
     tab = Shuffleboard.getTab("Elevator");
-    positionLayout = tab.getLayout("Elevator Movment", BuiltInLayouts.kList);
+    positionLayout = tab.getLayout("Elevator Movment", BuiltInLayouts.kGrid).withSize(2, 2);
 
     sTarget =
         positionLayout
@@ -99,20 +107,29 @@ public class Elevator extends SubsystemBase {
             .withProperties(Map.of("min", -1, "max", 1))
             .getEntry();
 
+    positionLayout.addBoolean("At Setpoint", this::atSetpoint);
+
+    positionLayout.addBoolean("Reset Trigger", reset::get);
+
     movementLayout = tab.getLayout("Movement", BuiltInLayouts.kGrid);
     movementLayout.add("Elevator 0", new MoveElevator(this, 0));
     movementLayout.add("Elevator Top", new MoveElevator(this, 12.2));
     movementLayout.add("Elevator Down", elevatorDown());
     movementLayout.add("Elevator Up", elevatorUp());
+
+    System.out.println("Elevator Shuffleboard Set Up");
   }
 
   public void setTarget(double target) {
     motor.set(
-        TalonSRXControlMode.Position, target * Constants.ElevatorConstants.encoderDistancePerPulse);
+        TalonSRXControlMode.Position,
+        target
+            * Constants.ElevatorConstants.encoderDistancePerPulse
+            / Constants.ElevatorConstants.heightPerEncoderDistance);
   }
 
   public boolean atSetpoint() {
-    return motor.getClosedLoopError() < Constants.ElevatorConstants.aceptableError;
+    return Math.abs(motor.getClosedLoopError()) < Constants.ElevatorConstants.aceptableError;
   }
 
   public boolean atLowerLimit() {
@@ -121,6 +138,8 @@ public class Elevator extends SubsystemBase {
 
   public void resetEncoder() {
     motor.setSelectedSensorPosition(0);
+
+    System.out.print("Reseting encoder position");
   }
 
   // Commands
@@ -129,10 +148,10 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command elevatorUp() {
-    return new StartEndCommand(() -> motor.set(-.75), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(0.75), () -> motor.set(0), this);
   }
 
   public Command elevatorDown() {
-    return new StartEndCommand(() -> motor.set(.75), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(-0.75), () -> motor.set(0), this);
   }
 }

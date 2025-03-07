@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.commands.Oparatordrive;
+import frc.robot.goups.LiftCoralFour;
+import frc.robot.goups.IntakeCoral;
 import frc.robot.subsystems.*;
 
 /**
@@ -103,6 +107,9 @@ public class RobotContainer {
 
     t_grabberOut = m_coDriverController.rightTrigger();
     t_grabberOut.whileTrue(sGrabber.Out());
+
+    SmartDashboard.putData(new IntakeCoral(sArm, sElevator, sGrabber));
+    SmartDashboard.putData(new LiftCoralFour(sArm, sElevator));
   }
 
   /**

@@ -54,11 +54,12 @@ public final class Constants {
     public static final double pidD = 0;
     public static final double encoderDistancePerPulse = 4096;
     public static final double aceptableError = 2048;
+    public static final double heightPerEncoderDistance = 1.2 * Math.PI;
   }
 
   public static class IntakeConstants {
     public static final int motor = 6;
-    public static final double speed = 0.5;
+    public static final double speed = 0.1;
   }
 
   public static class GrabberConstants {

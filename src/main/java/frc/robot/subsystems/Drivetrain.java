@@ -98,6 +98,8 @@ public class Drivetrain extends SubsystemBase {
     tab.add(this);
     tab.add("Toggle Gear", cmdToggleGear());
     tab.add("Reset Gyro", cmdResetGyro());
+
+    System.out.println("Drivetrain Shuffleboard Set Up");
   }
 
   public void ToggleGear() {

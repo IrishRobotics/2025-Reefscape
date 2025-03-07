@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -37,9 +38,12 @@ public class Arm extends SubsystemBase {
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
+  private ShuffleboardLayout movmentLayout;
   private ShuffleboardTab driveTab;
   private GenericEntry sArmTarget;
-  private GenericEntry sArmAngle;
+  private GenericEntry sPosition;
+  private GenericEntry sSpeed;
+  private GenericEntry sAtTarget;
 
   /** Creates a new Arm. */
   public Arm() {
@@ -50,7 +54,7 @@ public class Arm extends SubsystemBase {
     motorConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(15)
+        .p(4)
         .i(0)
         .d(0)
         .outputRange(-1, 1);
@@ -67,44 +71,58 @@ public class Arm extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    sArmTarget.setDouble(getTarget());
-    sArmAngle.setDouble(getAngle());
+    sPosition.setDouble(getAngle());
+    sArmTarget.setDouble(targetPos*360);
+    sSpeed.setDouble(motor.get());
+    sAtTarget.setBoolean(atTarget());
   }
 
   private void configureDashboard() {
     tab = Shuffleboard.getTab("Arm");
     driveTab = Shuffleboard.getTab("Driver");
 
-    positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kGrid).withSize(2, 3);
-    tab.add("Arm 90", new MoveArm(this, 90));
-    tab.add("Arm 00", new MoveArm(this, 0));
-    tab.add("Arm Up", this.ManualUp());
-    tab.add("Arm Down", this.ManualDown());
+    positionLayout = tab.getLayout("Manual Movement", BuiltInLayouts.kGrid);
 
-    positionLayout
-        .addDouble("Speed", motor::get)
-        .withSize(2, 1)
-        .withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("min", -1, "max", 1));
+    positionLayout.add("Arm 90", new MoveArm(this, 90));
+    positionLayout.add("Arm 135", new MoveArm(this, 135));
+    positionLayout.add("Arm 150", new MoveArm(this, 150));
+    positionLayout.add("Arm 0", new MoveArm(this, 0));
+    positionLayout.add("Arm Up", this.ManualUp());
+    positionLayout.add("Arm Down", this.ManualDown());
 
-    positionLayout
-        .addDouble("Position", encoder::getPosition)
-        .withSize(1, 1)
-        .withWidget(BuiltInWidgets.kTextView)
-        .withProperties(Map.of("startingAngle", 270));
+    tab.add("Reset encoder", new InstantCommand(() -> {encoder.setPosition(0);}));
+
+    positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kList).withSize(2, 3);
+
+    sPosition =
+        positionLayout
+            .add("Position", 0)
+            .withWidget(BuiltInWidgets.kTextView)
+            .withProperties(Map.of("min", -0, "max", 360))
+            .getEntry();
+
+    sSpeed =
+        positionLayout
+            .add("Speed", 0)
+            .withWidget(BuiltInWidgets.kNumberBar)
+            .withProperties(Map.of("min", -1, "max", 1))
+            .getEntry();
 
     sArmTarget =
         positionLayout
             .add("Target", 0)
             .withSize(1, 1)
-            .withWidget(BuiltInWidgets.kGyro)
-            .withProperties(Map.of("startingAngle", 270))
+            .withWidget(BuiltInWidgets.kTextView)
             .getEntry();
 
-    positionLayout
-        .addBoolean("At Target", this::atTarget)
-        .withSize(2, 1)
-        .withWidget(BuiltInWidgets.kBooleanBox);
+    sAtTarget =
+        positionLayout
+            .add("At Target", false)
+            .withSize(2, 1)
+            .withWidget(BuiltInWidgets.kBooleanBox)
+            .getEntry();
+
+    System.out.println("Arm Shuffleboard Set Up");
   }
 
   public void setTarget(double targetAngle) {
@@ -122,7 +140,7 @@ public class Arm extends SubsystemBase {
   }
 
   public boolean atTarget() {
-    return Math.abs(getAngle() - targetPos) < Constants.ArmConstants.targetTolerence;
+    return Math.abs(encoder.getPosition() - targetPos) < Constants.ArmConstants.targetTolerence;
   }
 
   private void up() {

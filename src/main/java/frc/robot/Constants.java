@@ -30,6 +30,9 @@ public final class Constants {
 
     // Input
     public static final int GearButton = XboxController.Button.kStart.value;
+
+    // Smart Speed
+    public static final int allowableOffset = 1;
   }
 
   public static class ArmConstants {

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -12,7 +13,14 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -27,14 +35,19 @@ public class Drivetrain extends SubsystemBase {
 
   // Motors
   private SparkMax mFrontLeftMotor;
+  private RelativeEncoder frontLeftEncoder;
   private SparkMax mFrontRightMotor;
+  private RelativeEncoder frontRightEncoder;
   private SparkMax mRearLeftMotor;
+  private RelativeEncoder backLeftEncoder;
   private SparkMax mRearRightMotor;
+  private RelativeEncoder backRightEncoder;
   private SparkMaxConfig mLeftConfig;
   private SparkMaxConfig mRightConfig;
 
   // Menanum Drive
   private MecanumDrive mMecanumDrive;
+  private MecanumDriveKinematics mecanumDriveKinematics;
 
   // Sensors
   private AHRS mNavx;
@@ -43,6 +56,7 @@ public class Drivetrain extends SubsystemBase {
   private ShuffleboardTab tab;
   private ShuffleboardTab driveTab;
   private GenericEntry sArmTarget;
+  private GenericEntry slipping;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -51,30 +65,37 @@ public class Drivetrain extends SubsystemBase {
     // Motors
     mLeftConfig = new SparkMaxConfig();
     mLeftConfig.idleMode(IdleMode.kBrake);
+    mLeftConfig.encoder.velocityConversionFactor(1);
 
     mRightConfig = new SparkMaxConfig();
     mRightConfig.idleMode(IdleMode.kBrake);
     mRightConfig.inverted(true);
+    mLeftConfig.encoder.velocityConversionFactor(1);
 
     mFrontLeftMotor = new SparkMax(Constants.OpConstants.kFrontLeftID, MotorType.kBrushless);
     mFrontLeftMotor.configure(
         mLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    frontLeftEncoder = mFrontLeftMotor.getEncoder();
 
     mFrontRightMotor = new SparkMax(Constants.OpConstants.kFrontRightID, MotorType.kBrushless);
     mFrontRightMotor.configure(
         mRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    frontRightEncoder = mFrontRightMotor.getEncoder();
 
     mRearLeftMotor = new SparkMax(Constants.OpConstants.kRearLeftID, MotorType.kBrushless);
     mRearLeftMotor.configure(
         mLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    backLeftEncoder = mRearLeftMotor.getEncoder();
 
     mRearRightMotor = new SparkMax(Constants.OpConstants.kRearRightID, MotorType.kBrushless);
     mRearRightMotor.configure(
         mRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    backRightEncoder = mRearRightMotor.getEncoder();
 
     // Mecanum Drive
     mMecanumDrive =
         new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
+    mecanumDriveKinematics = new MecanumDriveKinematics(new Translation2d(0.24368125, 0.225425), new Translation2d(0.24368125, -0.225425), new Translation2d(-0.24368125, 0.225425), new Translation2d(-0.24368125, -0.225425));
 
     // Sensors
     mNavx = new AHRS(NavXComType.kMXP_SPI);
@@ -98,6 +119,7 @@ public class Drivetrain extends SubsystemBase {
     tab.add(this);
     tab.add("Toggle Gear", cmdToggleGear());
     tab.add("Reset Gyro", cmdResetGyro());
+    slipping = tab.add("Slipping", false).getEntry();
 
     System.out.println("Drivetrain Shuffleboard Set Up");
   }
@@ -115,9 +137,14 @@ public class Drivetrain extends SubsystemBase {
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {
     double accelerationLimitSpeed = 1;
 
-    
+    MecanumDriveWheelSpeeds mecanumDriveWheelSpeeds = new MecanumDriveWheelSpeeds(frontLeftEncoder.getVelocity() ,frontRightEncoder.getVelocity(), backLeftEncoder.getVelocity(), backRightEncoder.getVelocity());
 
-    double adjustedSpeedValue = Math.min(speedValue, accelerationLimitSpeed);
+    ChassisSpeeds chassisMovement = mecanumDriveKinematics.toChassisSpeeds(mecanumDriveWheelSpeeds);
+    double speed = Math.sqrt(Math.pow(chassisMovement.vxMetersPerSecond, 2)+ Math.pow(chassisMovement.vyMetersPerSecond, 2));
+
+    slipping.setBoolean(mNavx.getAccelFullScaleRangeG()/9.80665 + Constants.OpConstants.allowableOffset > speed);
+
+    double adjustedSpeedValue = speedValue;// = Math.min(speedValue, accelerationLimitSpeed);
 
     if (fieldRelitave) {
       mMecanumDrive.driveCartesian(

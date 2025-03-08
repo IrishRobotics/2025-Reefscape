@@ -7,6 +7,7 @@ package frc.robot;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -53,6 +54,7 @@ public class RobotContainer {
     // m_driverController = new XboxController(Constants.kDriverControllerPort);
     m_driverController = new CommandXboxController(Constants.kDriverControllerPort);
     m_coDriverController = new CommandXboxController(Constants.kCoDriverControllerPort);
+    CameraServer.startAutomaticCapture();
 
     sDrivetrain = new Drivetrain();
     sArm = new Arm();
@@ -62,7 +64,7 @@ public class RobotContainer {
     
     // Default Commands
     sDrivetrain.setDefaultCommand(
-        new Oparatordrive(sDrivetrain, m_driverController.getHID(), navX, false));
+        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
 
     // Configure the trigger bindings
     configureBindings();

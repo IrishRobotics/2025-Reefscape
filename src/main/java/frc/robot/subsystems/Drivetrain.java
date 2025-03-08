@@ -113,11 +113,17 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {
+    double accelerationLimitSpeed = 1;
+
+    
+
+    double adjustedSpeedValue = Math.min(speedValue, accelerationLimitSpeed);
+
     if (fieldRelitave) {
       mMecanumDrive.driveCartesian(
-          x * speedValue, y * speedValue, turn * speedValue, mNavx.getRotation2d());
+          x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue, mNavx.getRotation2d());
     } else {
-      mMecanumDrive.driveCartesian(x * speedValue, y * speedValue, turn * speedValue);
+      mMecanumDrive.driveCartesian(x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue);
     }
   }
 

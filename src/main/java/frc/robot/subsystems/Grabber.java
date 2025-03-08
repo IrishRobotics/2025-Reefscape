@@ -38,10 +38,10 @@ public class Grabber extends SubsystemBase {
   }
 
   public Command In() {
-    return new StartEndCommand(() -> move(GrabberConstants.speed), () -> stop(), this);
+    return new StartEndCommand(() -> move(-GrabberConstants.speed), () -> stop(), this);
   }
 
   public Command Out() {
-    return new StartEndCommand(() -> move(-GrabberConstants.speed), () -> stop(), this);
+    return new StartEndCommand(() -> move(GrabberConstants.speed), () -> stop(), this);
   }
 }

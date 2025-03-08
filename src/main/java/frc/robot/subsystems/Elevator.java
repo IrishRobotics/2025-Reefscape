@@ -142,6 +142,10 @@ public class Elevator extends SubsystemBase {
     System.out.print("Reseting encoder position");
   }
 
+  public void move(double speed){
+    motor.set(speed);
+  }
+
   // Commands
   public Command cmdResetElevator() {
     return this.runOnce(() -> this.resetEncoder());

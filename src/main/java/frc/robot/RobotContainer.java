@@ -4,12 +4,18 @@
 
 package frc.robot;
 
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.commands.Oparatordrive;
-import frc.robot.goups.LiftCoralFour;
+import frc.robot.goups.LiftCoral;
+import frc.robot.goups.PostStart;
 import frc.robot.goups.IntakeCoral;
 import frc.robot.subsystems.*;
 
@@ -53,13 +59,15 @@ public class RobotContainer {
     sElevator = new Elevator();
     sGrabber = new Grabber();
     sIntake = new AlgeeIntake();
-
+    
     // Default Commands
     sDrivetrain.setDefaultCommand(
-        new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
+        new Oparatordrive(sDrivetrain, m_driverController.getHID(), navX, false));
 
     // Configure the trigger bindings
     configureBindings();
+
+    SmartDashboard.putData(new PostStart(sArm, sElevator));
   }
 
   /**
@@ -109,7 +117,7 @@ public class RobotContainer {
     t_grabberOut.whileTrue(sGrabber.Out());
 
     SmartDashboard.putData(new IntakeCoral(sArm, sElevator, sGrabber));
-    SmartDashboard.putData(new LiftCoralFour(sArm, sElevator));
+    SmartDashboard.putData("Lift Coral 4", new LiftCoral(sArm, sElevator, 4));
   }
 
   /**

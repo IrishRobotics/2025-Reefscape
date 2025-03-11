@@ -57,6 +57,9 @@ public class Drivetrain extends SubsystemBase {
   private ShuffleboardTab driveTab;
   private GenericEntry sArmTarget;
   private GenericEntry slipping;
+  private GenericEntry actualSpeed;
+  private GenericEntry motorSpeed;
+
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -120,6 +123,8 @@ public class Drivetrain extends SubsystemBase {
     tab.add("Toggle Gear", cmdToggleGear());
     tab.add("Reset Gyro", cmdResetGyro());
     slipping = tab.add("Slipping", false).getEntry();
+    actualSpeed = tab.add("Actual Speed", 0).getEntry();
+    motorSpeed = tab.add("Motor Speed", 0).getEntry();
 
     System.out.println("Drivetrain Shuffleboard Set Up");
   }
@@ -128,7 +133,7 @@ public class Drivetrain extends SubsystemBase {
     if (speedValue == Constants.OpConstants.kHighGear) {
       speedValue = Constants.OpConstants.kLowGear;
       SmartDashboard.putBoolean("Gear", false);
-    } else if (speedValue == Constants.OpConstants.kLowGear) {
+    } else {
       speedValue = Constants.OpConstants.kHighGear;
       SmartDashboard.putBoolean("Gear", true);
     }
@@ -140,9 +145,13 @@ public class Drivetrain extends SubsystemBase {
     MecanumDriveWheelSpeeds mecanumDriveWheelSpeeds = new MecanumDriveWheelSpeeds(frontLeftEncoder.getVelocity() ,frontRightEncoder.getVelocity(), backLeftEncoder.getVelocity(), backRightEncoder.getVelocity());
 
     ChassisSpeeds chassisMovement = mecanumDriveKinematics.toChassisSpeeds(mecanumDriveWheelSpeeds);
-    double speed = Math.sqrt(Math.pow(chassisMovement.vxMetersPerSecond, 2)+ Math.pow(chassisMovement.vyMetersPerSecond, 2));
+    double motorSpeedValue = Math.sqrt(Math.pow(chassisMovement.vxMetersPerSecond, 2)+ Math.pow(chassisMovement.vyMetersPerSecond, 2));
+    double actualSpeedValue = Math.sqrt(Math.pow(mNavx.getWorldLinearAccelX(), 2)+Math.pow(mNavx.getWorldLinearAccelY(), 2))/9.80665;
 
-    slipping.setBoolean(mNavx.getAccelFullScaleRangeG()/9.80665 + Constants.OpConstants.allowableOffset > speed);
+    slipping.setBoolean(actualSpeedValue + Constants.OpConstants.allowableOffset > motorSpeedValue);
+
+    actualSpeed.setDouble(actualSpeedValue/motorSpeedValue);
+    motorSpeed.setDouble(motorSpeedValue);
 
     double adjustedSpeedValue = speedValue;// = Math.min(speedValue, accelerationLimitSpeed);
 
@@ -152,6 +161,8 @@ public class Drivetrain extends SubsystemBase {
     } else {
       mMecanumDrive.driveCartesian(x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue);
     }
+
+    //System.out.println(adjustedSpeedValue);
   }
 
   // Commands

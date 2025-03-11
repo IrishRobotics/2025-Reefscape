@@ -35,7 +35,9 @@ public class Oparatordrive extends Command {
   public void execute() {
     double x, y, z;
 
-    x = Math.pow(mController.getRightX(), 2) * Math.signum(mController.getRightX());
+    double _x1 =- mController.getLeftTriggerAxis() + mController.getRightTriggerAxis();
+
+    x = Math.pow(_x1, 2) * Math.signum(_x1);
     y = Math.pow(mController.getRightY(), 2) * Math.signum(mController.getRightY());
     z = Math.pow(mController.getLeftX(), 2) * Math.signum(mController.getLeftX());    
 

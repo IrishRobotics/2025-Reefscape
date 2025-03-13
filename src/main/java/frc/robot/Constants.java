@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.XboxController;
 public final class Constants {
   public static final int kDriverControllerPort = 1;
   public static final int kCoDriverControllerPort = 2;
+  public static final double gravitationalAcelleration = 9.80665;
 
   public static class OpConstants {
     // Drivetrain Constants
@@ -33,6 +34,9 @@ public final class Constants {
 
     // Smart Speed
     public static final int allowableOffset = 1;
+
+    public static final double kWheelCircumfrance = 0.2032 * Math.PI;
+    public static final double kGearRatio = 8.45;
   }
 
   public static class ArmConstants {

@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import com.studica.frc.AHRS;
-
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drivetrain;
@@ -35,11 +33,11 @@ public class Oparatordrive extends Command {
   public void execute() {
     double x, y, z;
 
-    double _x1 =- mController.getLeftTriggerAxis() + mController.getRightTriggerAxis();
+    double _x1 = -mController.getLeftTriggerAxis() + mController.getRightTriggerAxis();
 
     x = Math.pow(_x1, 2) * Math.signum(_x1);
     y = Math.pow(mController.getRightY(), 2) * Math.signum(mController.getRightY());
-    z = Math.pow(mController.getLeftX(), 2) * Math.signum(mController.getLeftX());    
+    z = Math.pow(mController.getLeftX(), 2) * Math.signum(mController.getLeftX());
 
     sDrive.Drive(-y, x, z, mFieldRelative);
   }

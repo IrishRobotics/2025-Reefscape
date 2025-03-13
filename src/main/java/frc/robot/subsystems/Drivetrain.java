@@ -13,14 +13,11 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
-import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -58,8 +55,7 @@ public class Drivetrain extends SubsystemBase {
   private GenericEntry sArmTarget;
   private GenericEntry slipping;
   private GenericEntry actualSpeed;
-  private GenericEntry motorSpeed;
-
+  private GenericEntry speedRatio;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -98,7 +94,12 @@ public class Drivetrain extends SubsystemBase {
     // Mecanum Drive
     mMecanumDrive =
         new MecanumDrive(mFrontLeftMotor, mRearLeftMotor, mFrontRightMotor, mRearRightMotor);
-    mecanumDriveKinematics = new MecanumDriveKinematics(new Translation2d(0.24368125, 0.225425), new Translation2d(0.24368125, -0.225425), new Translation2d(-0.24368125, 0.225425), new Translation2d(-0.24368125, -0.225425));
+    mecanumDriveKinematics =
+        new MecanumDriveKinematics(
+            new Translation2d(0.24368125, 0.225425),
+            new Translation2d(0.24368125, -0.225425),
+            new Translation2d(-0.24368125, 0.225425),
+            new Translation2d(-0.24368125, -0.225425));
 
     // Sensors
     mNavx = new AHRS(NavXComType.kMXP_SPI);
@@ -124,7 +125,7 @@ public class Drivetrain extends SubsystemBase {
     tab.add("Reset Gyro", cmdResetGyro());
     slipping = tab.add("Slipping", false).getEntry();
     actualSpeed = tab.add("Actual Speed", 0).getEntry();
-    motorSpeed = tab.add("Motor Speed", 0).getEntry();
+    speedRatio = tab.add("Speed Ratio", 0).getEntry();
 
     System.out.println("Drivetrain Shuffleboard Set Up");
   }
@@ -142,27 +143,44 @@ public class Drivetrain extends SubsystemBase {
   public void Drive(double x, double y, double turn, boolean fieldRelitave) {
     double accelerationLimitSpeed = 1;
 
-    MecanumDriveWheelSpeeds mecanumDriveWheelSpeeds = new MecanumDriveWheelSpeeds(frontLeftEncoder.getVelocity() ,frontRightEncoder.getVelocity(), backLeftEncoder.getVelocity(), backRightEncoder.getVelocity());
+    MecanumDriveWheelSpeeds mecanumDriveWheelSpeeds =
+        new MecanumDriveWheelSpeeds(
+            frontLeftEncoder.getVelocity(),
+            frontRightEncoder.getVelocity(),
+            backLeftEncoder.getVelocity(),
+            backRightEncoder.getVelocity());
 
     ChassisSpeeds chassisMovement = mecanumDriveKinematics.toChassisSpeeds(mecanumDriveWheelSpeeds);
-    double motorSpeedValue = Math.sqrt(Math.pow(chassisMovement.vxMetersPerSecond, 2)+ Math.pow(chassisMovement.vyMetersPerSecond, 2));
-    double actualSpeedValue = Math.sqrt(Math.pow(mNavx.getWorldLinearAccelX(), 2)+Math.pow(mNavx.getWorldLinearAccelY(), 2))/9.80665;
+    Translation2d motorSpeedVector =
+        new Translation2d(chassisMovement.vxMetersPerSecond, chassisMovement.vyMetersPerSecond);
+    motorSpeedVector.div(4096);
+    motorSpeedVector.times(
+        Constants.OpConstants.kWheelCircumfrance / Constants.OpConstants.kGearRatio);
+    Translation2d actualSpeedVector =
+        new Translation2d(
+            mNavx.getWorldLinearAccelX() / Constants.gravitationalAcelleration,
+            mNavx.getWorldLinearAccelY() / Constants.gravitationalAcelleration);
 
-    slipping.setBoolean(actualSpeedValue + Constants.OpConstants.allowableOffset > motorSpeedValue);
+    // slipping.setBoolean(actualSpeedValue + Constants.OpConstants.allowableOffset >
+    // motorSpeedValue);
 
-    actualSpeed.setDouble(actualSpeedValue/motorSpeedValue);
-    motorSpeed.setDouble(motorSpeedValue);
+    actualSpeed.setDouble(motorSpeedVector.getNorm());
+    speedRatio.setDouble(actualSpeedVector.getNorm() / motorSpeedVector.getNorm());
 
-    double adjustedSpeedValue = speedValue;// = Math.min(speedValue, accelerationLimitSpeed);
+    double adjustedSpeedValue = speedValue; // = Math.min(speedValue, accelerationLimitSpeed);
 
     if (fieldRelitave) {
       mMecanumDrive.driveCartesian(
-          x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue, mNavx.getRotation2d());
+          x * adjustedSpeedValue,
+          y * adjustedSpeedValue,
+          turn * adjustedSpeedValue,
+          mNavx.getRotation2d());
     } else {
-      mMecanumDrive.driveCartesian(x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue);
+      mMecanumDrive.driveCartesian(
+          x * adjustedSpeedValue, y * adjustedSpeedValue, turn * adjustedSpeedValue);
     }
 
-    //System.out.println(adjustedSpeedValue);
+    // System.out.println(adjustedSpeedValue);
   }
 
   // Commands

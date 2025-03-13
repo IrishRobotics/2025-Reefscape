@@ -66,6 +66,8 @@ public class Elevator extends SubsystemBase {
 
     resetTrigger.whileTrue(new RepeatCommand(cmdResetElevator()));
 
+    motor.setSelectedSensorPosition(0);//TODO find
+
     configureDashboard();
   }
 
@@ -74,7 +76,7 @@ public class Elevator extends SubsystemBase {
     if (motor.getControlMode() == ControlMode.Position)
       sTarget.setDouble(motor.getClosedLoopTarget());
     else sTarget.setDouble(Double.NaN);
-    
+
     sPosition.setDouble(
         motor.getSelectedSensorPosition()
             / Constants.ElevatorConstants.encoderDistancePerPulse
@@ -142,7 +144,7 @@ public class Elevator extends SubsystemBase {
     System.out.print("Reseting encoder position");
   }
 
-  public void move(double speed){
+  public void move(double speed) {
     motor.set(speed);
   }
 

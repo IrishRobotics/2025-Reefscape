@@ -72,7 +72,7 @@ public class Arm extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     sPosition.setDouble(getAngle());
-    sArmTarget.setDouble(targetPos*360);
+    sArmTarget.setDouble(targetPos * 360);
     sSpeed.setDouble(motor.get());
     sAtTarget.setBoolean(atTarget());
   }
@@ -90,7 +90,12 @@ public class Arm extends SubsystemBase {
     positionLayout.add("Arm Up", this.ManualUp());
     positionLayout.add("Arm Down", this.ManualDown());
 
-    tab.add("Reset encoder", new InstantCommand(() -> {encoder.setPosition(0);}));
+    tab.add(
+        "Reset encoder",
+        new InstantCommand(
+            () -> {
+              encoder.setPosition(0);
+            }));
 
     positionLayout = tab.getLayout("Arm Movment", BuiltInLayouts.kList).withSize(2, 3);
 

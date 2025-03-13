@@ -4,20 +4,19 @@
 
 package frc.robot;
 
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
-
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.commands.Oparatordrive;
-import frc.robot.goups.LiftCoral;
-import frc.robot.goups.PostStart;
-import frc.robot.goups.IntakeCoral;
+import frc.robot.commands.Arm.MoveArm;
+import frc.robot.commands.Elevator.MoveElevator;
+import frc.robot.commands.goups.DrivePosition;
+import frc.robot.commands.goups.IntakeCoral;
+import frc.robot.commands.goups.LiftCoral;
+import frc.robot.commands.goups.ZeroElevator;
 import frc.robot.subsystems.*;
 
 /**
@@ -54,14 +53,20 @@ public class RobotContainer {
     // m_driverController = new XboxController(Constants.kDriverControllerPort);
     m_driverController = new CommandXboxController(Constants.kDriverControllerPort);
     m_coDriverController = new CommandXboxController(Constants.kCoDriverControllerPort);
-    CameraServer.startAutomaticCapture();
 
     sDrivetrain = new Drivetrain();
     sArm = new Arm();
     sElevator = new Elevator();
     sGrabber = new Grabber();
     sIntake = new AlgeeIntake();
-    
+
+    // Camera Port Forwarding
+    PortForwarder.add(5800, "2606photon.local", 5800);
+    PortForwarder.add(1181, "2606photon.local", 1181);
+    PortForwarder.add(1182, "2606photon.local", 1182);
+    PortForwarder.add(1183, "2606photon.local", 1183);
+    PortForwarder.add(1184, "2606photon.local", 1184);
+
     // Default Commands
     sDrivetrain.setDefaultCommand(
         new Oparatordrive(sDrivetrain, m_driverController.getHID(), false));
@@ -69,7 +74,6 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    SmartDashboard.putData(new PostStart(sArm, sElevator));
   }
 
   /**
@@ -120,6 +124,9 @@ public class RobotContainer {
 
     SmartDashboard.putData(new IntakeCoral(sArm, sElevator, sGrabber));
     SmartDashboard.putData("Lift Coral 4", new LiftCoral(sArm, sElevator, 4));
+    SmartDashboard.putData("Drive Position", new DrivePosition(sArm, sElevator));
+    SmartDashboard.putData("Start Position", new SequentialCommandGroup(new MoveElevator(sElevator, 18.96), new MoveArm(sArm, 17)));
+    SmartDashboard.putData(new ZeroElevator(sArm, sElevator));
   }
 
   /**

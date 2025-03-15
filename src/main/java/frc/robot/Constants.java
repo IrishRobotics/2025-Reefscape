@@ -43,7 +43,7 @@ public final class Constants {
     // Motors
     public static final int kArmMotor1 = 9;
     // DIO
-    public static final int kLowerLimit = 1;
+    public static final int kUpperLimit = 2;
     // Encoders
     public static final int kAbsEncoder = 1;
     public static final double kEncoderOffset = 90 / 360;

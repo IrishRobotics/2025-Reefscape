@@ -4,15 +4,14 @@
 
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.*;
-import frc.robot.commands.Oparatordrive;
 import frc.robot.commands.Arm.MoveArm;
 import frc.robot.commands.Elevator.MoveElevator;
+import frc.robot.commands.Oparatordrive;
 import frc.robot.commands.goups.DrivePosition;
 import frc.robot.commands.goups.IntakeCoral;
 import frc.robot.commands.goups.LiftCoral;
@@ -73,7 +72,6 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-
   }
 
   /**
@@ -125,7 +123,9 @@ public class RobotContainer {
     SmartDashboard.putData(new IntakeCoral(sArm, sElevator, sGrabber));
     SmartDashboard.putData("Lift Coral 4", new LiftCoral(sArm, sElevator, 4));
     SmartDashboard.putData("Drive Position", new DrivePosition(sArm, sElevator));
-    SmartDashboard.putData("Start Position", new SequentialCommandGroup(new MoveElevator(sElevator, 18.96), new MoveArm(sArm, 17)));
+    SmartDashboard.putData(
+        "Start Position",
+        new SequentialCommandGroup(new MoveElevator(sElevator, 18.96), new MoveArm(sArm, 17)));
     SmartDashboard.putData(new ZeroElevator(sArm, sElevator));
   }
 

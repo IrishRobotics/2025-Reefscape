@@ -15,16 +15,21 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.commands.Arm.MoveArm;
 import java.util.Map;
 
@@ -35,6 +40,10 @@ public class Arm extends SubsystemBase {
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder encoder;
   private double targetPos;
+  private int angleOffset = 180;
+
+  private DigitalInput upperLimit;
+  // private Trigger resetTrigger;
 
   private ShuffleboardTab tab;
   private ShuffleboardLayout positionLayout;
@@ -59,11 +68,14 @@ public class Arm extends SubsystemBase {
         .d(0)
         .outputRange(-1, 1);
     motorConfig.encoder.positionConversionFactor(0.5);
+    motorConfig.softLimit.forwardSoftLimit((165) / 90).forwardSoftLimitEnabled(true);
     motorConfig.idleMode(IdleMode.kBrake);
 
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     closedLoopController = motor.getClosedLoopController();
     encoder = motor.getEncoder();
+
+    upperLimit = new DigitalInput(Constants.ArmConstants.kUpperLimit);
 
     configureDashboard();
   }
@@ -75,6 +87,11 @@ public class Arm extends SubsystemBase {
     sArmTarget.setDouble(targetPos * 360);
     sSpeed.setDouble(motor.get());
     sAtTarget.setBoolean(atTarget());
+    SmartDashboard.putBoolean("ArmUpLim", atUpperLimit());
+
+    if(DriverStation.isEnabled() & atUpperLimit()) { 
+      // resetEncoder();
+        }
   }
 
   private void configureDashboard() {
@@ -126,11 +143,9 @@ public class Arm extends SubsystemBase {
             .withSize(2, 1)
             .withWidget(BuiltInWidgets.kBooleanBox)
             .getEntry();
-
-    System.out.println("Arm Shuffleboard Set Up");
   }
 
-  public void setTarget(double targetAngle) {
+  public void setTarget(double targetAngle) {;
     targetPos = targetAngle / 360;
     closedLoopController.setReference(targetAngle / 360, ControlType.kPosition);
     sArmTarget.setDouble(targetAngle);
@@ -148,8 +163,20 @@ public class Arm extends SubsystemBase {
     return Math.abs(encoder.getPosition() - targetPos) < Constants.ArmConstants.targetTolerence;
   }
 
+  public boolean atUpperLimit() {
+    return !upperLimit.get();
+  }
+
+  public void resetEncoder() {
+    motor.getEncoder().setPosition(165/180 );
+  }
+
   private void up() {
-    motor.set(Constants.ArmConstants.kArmSpeed);
+    if (atUpperLimit()) {
+      motor.set(0);
+    } else {
+      motor.set(Constants.ArmConstants.kArmSpeed);
+    }
   }
 
   private void down() {
@@ -166,5 +193,9 @@ public class Arm extends SubsystemBase {
 
   public Command ManualDown() {
     return new StartEndCommand(() -> down(), () -> stop(), this);
+  }
+
+  public Command cmdResetElevator() {
+    return this.runOnce(() -> this.resetEncoder());
   }
 }

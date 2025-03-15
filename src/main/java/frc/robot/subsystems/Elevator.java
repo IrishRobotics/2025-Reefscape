@@ -66,7 +66,7 @@ public class Elevator extends SubsystemBase {
 
     resetTrigger.whileTrue(new RepeatCommand(cmdResetElevator()));
 
-    motor.setSelectedSensorPosition(0);//TODO find
+    motor.setSelectedSensorPosition(0); // TODO find
 
     configureDashboard();
   }
@@ -118,8 +118,6 @@ public class Elevator extends SubsystemBase {
     movementLayout.add("Elevator Top", new MoveElevator(this, 12.2));
     movementLayout.add("Elevator Down", elevatorDown());
     movementLayout.add("Elevator Up", elevatorUp());
-
-    System.out.println("Elevator Shuffleboard Set Up");
   }
 
   public void setTarget(double target) {

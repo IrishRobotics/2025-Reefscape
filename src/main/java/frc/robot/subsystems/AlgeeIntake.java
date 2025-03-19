@@ -18,6 +18,7 @@ public class AlgeeIntake extends SubsystemBase {
   public AlgeeIntake() {
     setName("Algae Intake");
     mMotor = new TalonSRX(Constants.IntakeConstants.motor);
+    mMotor.setInverted(true);
   }
 
   @Override

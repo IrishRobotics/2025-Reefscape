@@ -152,10 +152,10 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command elevatorUp() {
-    return new StartEndCommand(() -> motor.set(0.75), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(1), () -> motor.set(0), this);
   }
 
   public Command elevatorDown() {
-    return new StartEndCommand(() -> motor.set(-0.75), () -> motor.set(0), this);
+    return new StartEndCommand(() -> motor.set(-1), () -> motor.set(0), this);
   }
 }

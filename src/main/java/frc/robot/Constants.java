@@ -66,7 +66,7 @@ public final class Constants {
 
   public static class IntakeConstants {
     public static final int motor = 6;
-    public static final double speed = 0.1;
+    public static final double speed = 0.9;
   }
 
   public static class GrabberConstants {
